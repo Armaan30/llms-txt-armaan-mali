@@ -117,8 +117,11 @@ export default function Directory() {
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="truncate text-sm font-semibold">{site.siteName}</span>
-                  <span className="shrink-0 text-xs text-zinc-400">
-                    {timeAgo(site.updatedAt)}
+                  <span
+                    className="shrink-0 text-xs text-zinc-400"
+                    title={`Content last updated ${timeAgo(site.updatedAt)}`}
+                  >
+                    checked {timeAgo(site.lastCheckedAt)}
                   </span>
                 </div>
                 <div className="mt-0.5 truncate font-mono text-xs text-zinc-500">
