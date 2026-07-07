@@ -74,6 +74,13 @@ The goal is **curation, not indexing** — a 2,000-link llms.txt is worse than a
 
 The cron fingerprints each site's *extracted* content — a SHA-256 over the sorted `(url, title, description)` set — rather than raw HTML, so markup churn and A/B noise don't trigger false regenerations. Changed sites are regenerated in the same pass (the hash-check crawl is reused). Human-edited files are checked but never overwritten.
 
+Two schedules drive the same endpoint:
+
+- **Vercel cron** (`vercel.json`): daily at 06:00 UTC — the Hobby plan's maximum frequency.
+- **GitHub Actions** (`.github/workflows/monitor.yml`): every 6 hours. To enable it, add two repository secrets under *Settings → Secrets and variables → Actions*: `APP_URL` (your deployment URL) and `CRON_SECRET` (same value as the Vercel env var). It can also be run on demand from the Actions tab.
+
+The endpoint is idempotent and self-batching, so overlapping schedules are harmless — each run just checks the least-recently-checked sites.
+
 ### Error handling & abuse protection
 
 - **SSRF:** user-supplied URLs are DNS-resolved and rejected if they point at private/internal ranges — and every redirect hop is re-validated, so a public URL can't bounce the crawler into the internal network.

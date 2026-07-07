@@ -29,6 +29,15 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
     fromCache ? "This site was already in the directory — showing the existing file." : null,
   );
 
+  // Warn before leaving the page with unsaved edits.
+  useEffect(() => {
+    const dirtyNow = site !== null && draft !== site.llmsTxt;
+    if (!dirtyNow) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [site, draft]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -155,7 +164,10 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
             {site.domain} ↗
           </a>
         </div>
-        <Link href="/" className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">
+        <Link
+          href="/"
+          className="rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-indigo-400 hover:text-indigo-600 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
+        >
           ← All sites
         </Link>
       </div>
@@ -191,13 +203,28 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
         <button onClick={download} className={buttonClass}>
           Download llms.txt
         </button>
-        <button
-          onClick={saveEdits}
-          disabled={!dirty || saving}
-          className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-40`}
-        >
-          {saving ? "Saving…" : dirty ? "Save edits" : "Saved"}
-        </button>
+        {dirty ? (
+          <>
+            <button
+              onClick={saveEdits}
+              disabled={saving}
+              className="rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-60"
+            >
+              {saving ? "Saving…" : "Save edits"}
+            </button>
+            <button
+              onClick={() => setDraft(site.llmsTxt)}
+              disabled={saving}
+              className={buttonClass}
+            >
+              Discard changes
+            </button>
+          </>
+        ) : (
+          <button disabled className={`${buttonClass} cursor-default opacity-50`}>
+            Saved ✓
+          </button>
+        )}
         <button
           onClick={regenerate}
           disabled={regenerating}
@@ -205,6 +232,12 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
         >
           {regenerating ? (regenMessage ?? "Regenerating…") : "Regenerate"}
         </button>
+        {dirty && (
+          <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+            unsaved changes
+          </span>
+        )}
       </div>
 
       <textarea

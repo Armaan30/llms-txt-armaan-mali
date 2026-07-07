@@ -15,7 +15,7 @@ export async function GET(
     return new Response(site.llmsTxt, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "public, max-age=300", // 5 min — refreshes after regeneration
+        "Cache-Control": "public, max-age=60", // 1 min — edits/regenerations show up fast
         "Last-Modified": site.updatedAt.toUTCString(),
       },
     });

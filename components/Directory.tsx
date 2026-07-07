@@ -20,32 +20,50 @@ export default function Directory() {
   const [error, setError] = useState<string | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const load = useCallback(async (activeTab: Tab, q: string) => {
+  const fetchSites = useCallback(async (activeTab: Tab, q: string): Promise<PublicSite[]> => {
     const params = new URLSearchParams();
     const browserId = getBrowserId();
     if (browserId) params.set("browserId", browserId);
     if (activeTab === "mine") params.set("mine", "1");
     else if (q) params.set("q", q);
-    try {
-      const res = await fetch(`/api/sites?${params}`);
-      if (!res.ok) throw new Error();
-      const body = (await res.json()) as { sites: PublicSite[] };
-      setSites(body.sites);
-      setError(null);
-    } catch {
-      setError("Could not load the directory.");
-      setSites([]);
-    }
+    const res = await fetch(`/api/sites?${params}`);
+    if (!res.ok) throw new Error("Could not load the directory.");
+    const body = (await res.json()) as { sites: PublicSite[] };
+    return body.sites;
   }, []);
 
   useEffect(() => {
-    load(tab, "");
-  }, [tab, load]);
+    let cancelled = false;
+    fetchSites(tab, "")
+      .then((rows) => {
+        if (cancelled) return;
+        setSites(rows);
+        setError(null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError("Could not load the directory.");
+        setSites([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, fetchSites]);
 
   function handleSearch(value: string) {
     setQuery(value);
     if (debounce.current) clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => load(tab, value), 250);
+    debounce.current = setTimeout(() => {
+      fetchSites(tab, value)
+        .then((rows) => {
+          setSites(rows);
+          setError(null);
+        })
+        .catch(() => {
+          setError("Could not load the directory.");
+          setSites([]);
+        });
+    }, 250);
   }
 
   return (

@@ -1,0 +1,23 @@
+# Runs the monitoring check every 6 hours. Vercel's Hobby plan caps native
+# crons at once daily, so this workflow supplements the vercel.json cron by
+# calling the same protected endpoint on a faster schedule.
+#
+# Requires two repository secrets (Settings -> Secrets and variables -> Actions):
+#   APP_URL      e.g. https://llms-txt-armaan-mali.vercel.app
+#   CRON_SECRET  same value as the Vercel env var
+name: monitor
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {} # allows manual runs from the Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger monitoring check
+        run: |
+          curl -fsS --max-time 300 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/check"
