@@ -27,7 +27,7 @@ const BodySchema = z.object({
 
 // Naive per-IP rate limit. In-memory is per-instance, which is fine for the
 // abuse case it guards (one client hammering the crawler through one function).
-const RATE_LIMIT = 8; // generations per window
+const RATE_LIMIT = 15; // generations per window
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const hits = new Map<string, number[]>();
 
