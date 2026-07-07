@@ -18,6 +18,12 @@ jobs:
     steps:
       - name: Trigger monitoring check
         run: |
-          curl -fsS --max-time 300 \
+          # Strip any trailing slash from APP_URL so we never hit a 308 redirect.
+          base="${{ secrets.APP_URL }}"
+          base="${base%/}"
+          body=$(curl -fsS --max-time 300 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.APP_URL }}/api/cron/check"
+            "$base/api/cron/check")
+          echo "$body"
+          # A redirect page or error body is a failure, not a success.
+          echo "$body" | grep -q '"checked"' || { echo "::error::Unexpected response — check APP_URL (https, no trailing slash) and CRON_SECRET"; exit 1; }
