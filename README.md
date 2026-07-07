@@ -77,7 +77,7 @@ The cron fingerprints each site's *extracted* content — a SHA-256 over the sor
 Two schedules drive the same endpoint:
 
 - **Vercel cron** (`vercel.json`): daily at 06:00 UTC — the Hobby plan's maximum frequency.
-- **GitHub Actions** (`.github/workflows/monitor.yml`): every 6 hours. To enable it, add two repository secrets under *Settings → Secrets and variables → Actions*: `APP_URL` (your deployment URL) and `CRON_SECRET` (same value as the Vercel env var). It can also be run on demand from the Actions tab.
+- **GitHub Actions** (`.github/workflows/monitor.yml`): hourly. To enable it, add two repository secrets under *Settings → Secrets and variables → Actions*: `APP_URL` (your deployment URL) and `CRON_SECRET` (same value as the Vercel env var). It can also be run on demand from the Actions tab.
 
 The endpoint is idempotent and self-batching, so overlapping schedules are harmless — each run just checks the least-recently-checked sites.
 

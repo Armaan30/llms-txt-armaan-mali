@@ -1,6 +1,6 @@
-# Runs the monitoring check every 6 hours. Vercel's Hobby plan caps native
-# crons at once daily, so this workflow supplements the vercel.json cron by
-# calling the same protected endpoint on a faster schedule.
+# Runs the monitoring check hourly. Vercel's Hobby plan caps native crons at
+# once daily, so this workflow supplements the vercel.json cron by calling
+# the same protected endpoint on a faster schedule.
 #
 # Requires two repository secrets (Settings -> Secrets and variables -> Actions):
 #   APP_URL      e.g. https://llms-txt-armaan-mali.vercel.app
@@ -9,7 +9,7 @@ name: monitor
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 * * * *"
   workflow_dispatch: {} # allows manual runs from the Actions tab
 
 jobs:
