@@ -80,7 +80,7 @@ export default function GenerateForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="flex gap-2">
+      <div className="flex">
         <input
           type="text"
           value={url}
@@ -88,49 +88,51 @@ export default function GenerateForm() {
           placeholder="stripe.com"
           disabled={running}
           autoFocus
-          className="min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-3 font-mono text-sm shadow-sm outline-none placeholder:text-zinc-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
+          className="min-w-0 flex-1 border border-zinc-300 bg-transparent px-4 py-3 font-mono text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
         />
         <button
           type="submit"
           disabled={running || !url.trim()}
-          className="shrink-0 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 border border-zinc-900 bg-zinc-900 px-6 py-3 font-mono text-sm text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          {running ? "Generating…" : "Generate"}
+          {running ? "generating…" : "generate"}
         </button>
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+      <label className="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
         <input
           type="checkbox"
           checked={listed}
           onChange={(e) => setListed(e.target.checked)}
           disabled={running}
-          className="h-3.5 w-3.5 accent-indigo-600"
+          className="h-3.5 w-3.5 accent-zinc-900 dark:accent-zinc-100"
         />
-        List in the public directory (uncheck for an unlisted result — it still gets a
-        shareable URL)
+        list in the public directory
+        <span className="text-zinc-400 dark:text-zinc-600">
+          — unlisted files still get a shareable URL
+        </span>
       </label>
 
       {running && (
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="space-y-1.5 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="border border-zinc-800 bg-[#0c0c0c] p-4">
+          <div className="space-y-1.5 font-mono text-xs">
             {log.slice(0, -1).map((line, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-emerald-500">✓</span>
+              <div key={i} className="text-zinc-500">
+                <span className="mr-2 text-zinc-600">✓</span>
                 {line.message}
               </div>
             ))}
             {current && (
-              <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-200">
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border border-indigo-500 border-t-transparent" />
+              <div className="text-zinc-100">
+                <span className="mr-2 animate-pulse text-zinc-400">▸</span>
                 {current.message}
               </div>
             )}
           </div>
           {current?.fetched != null && current.total != null && (
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <div className="mt-3 h-0.5 bg-zinc-800">
               <div
-                className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+                className="h-full bg-zinc-100 transition-all duration-300"
                 style={{ width: `${Math.min(100, (current.fetched / current.total) * 100)}%` }}
               />
             </div>
@@ -139,7 +141,7 @@ export default function GenerateForm() {
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="border border-red-300 px-4 py-3 font-mono text-xs text-red-700 dark:border-red-900 dark:text-red-400">
           {error}
         </div>
       )}

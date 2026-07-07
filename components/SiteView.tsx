@@ -16,6 +16,11 @@ type GenerateEvent =
   | { type: "done"; site: PublicSite; warnings: string[] }
   | { type: "error"; message: string };
 
+const buttonSecondary =
+  "border border-zinc-300 px-4 py-2 font-mono text-xs transition hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-700 dark:hover:border-zinc-100 dark:hover:text-zinc-100";
+const buttonPrimary =
+  "border border-zinc-900 bg-zinc-900 px-4 py-2 font-mono text-xs text-white transition hover:bg-zinc-700 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
+
 export default function SiteView({ id, fromCache }: { id: string; fromCache: boolean }) {
   const [site, setSite] = useState<PublicSite | null>(null);
   const [draft, setDraft] = useState("");
@@ -56,21 +61,29 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
 
   if (loadError) {
     return (
-      <div className="space-y-4 py-12 text-center">
-        <p className="text-sm text-red-600 dark:text-red-400">{loadError}</p>
-        <Link href="/" className="text-sm text-indigo-600 underline dark:text-indigo-400">
-          ← Back to the generator
+      <div className="space-y-4 py-16 text-center">
+        <p className="font-mono text-xs text-red-700 dark:text-red-400">{loadError}</p>
+        <Link
+          href="/"
+          className="font-mono text-xs underline decoration-dotted underline-offset-4"
+        >
+          ← back to the generator
         </Link>
       </div>
     );
   }
   if (!site) {
-    return <p className="py-12 text-center text-sm text-zinc-400">Loading…</p>;
+    return (
+      <p className="py-16 text-center font-mono text-xs text-zinc-400 dark:text-zinc-600">
+        loading…
+      </p>
+    );
   }
 
   const dirty = draft !== site.llmsTxt;
   const hostedPath = `/f/${site.id}/llms.txt`;
-  const hostedUrl = typeof window !== "undefined" ? window.location.origin + hostedPath : hostedPath;
+  const hostedUrl =
+    typeof window !== "undefined" ? window.location.origin + hostedPath : hostedPath;
 
   async function copyToClipboard(text: string, which: "file" | "url") {
     try {
@@ -151,135 +164,144 @@ export default function SiteView({ id, fromCache }: { id: string; fromCache: boo
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-900 pb-5 dark:border-zinc-100">
+        <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">{site.siteName}</h1>
           <a
             href={`https://${site.domain}`}
             target="_blank"
             rel="noreferrer"
-            className="font-mono text-xs text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+            className="font-mono text-xs text-zinc-500 underline decoration-dotted underline-offset-4 hover:text-zinc-900 dark:hover:text-zinc-100"
           >
-            {site.domain} ↗
+            {site.domain}
           </a>
         </div>
-        <Link
-          href="/"
-          className="rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-indigo-400 hover:text-indigo-600 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
-        >
-          ← All sites
+        <Link href="/" className={buttonSecondary}>
+          ← all sites
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
-        <span title={new Date(site.updatedAt).toLocaleString()}>
-          Last updated {timeAgo(site.updatedAt)}
-        </span>
-        <span title={new Date(site.lastCheckedAt).toLocaleString()}>
-          Monitored · last checked {timeAgo(site.lastCheckedAt)}
-        </span>
-        <span>{site.pageCount} pages analyzed</span>
-        {site.usedLlm && <span className="text-indigo-600 dark:text-indigo-400">AI-organized</span>}
-        {site.editedByUser && <span className="text-amber-600 dark:text-amber-400">human-edited</span>}
-        {!site.isListed && <span>unlisted</span>}
-      </div>
+      <dl className="flex flex-wrap gap-x-8 gap-y-3">
+        <MetaItem label="last checked" value={timeAgo(site.lastCheckedAt)} />
+        <MetaItem label="last updated" value={timeAgo(site.updatedAt)} />
+        <MetaItem label="pages" value={String(site.pageCount)} />
+        <MetaItem
+          label="flags"
+          value={
+            [
+              site.usedLlm && "[ai]",
+              site.editedByUser && "[edited]",
+              !site.isListed && "[unlisted]",
+            ]
+              .filter(Boolean)
+              .join(" ") || "—"
+          }
+        />
+      </dl>
 
       {notice && (
-        <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">
+        <div className="border border-zinc-300 px-4 py-2.5 font-mono text-xs dark:border-zinc-700">
           {notice}
         </div>
       )}
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="border border-red-300 px-4 py-2.5 font-mono text-xs text-red-700 dark:border-red-900 dark:text-red-400">
           {actionError}
         </div>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => copyToClipboard(draft, "file")} className={buttonClass}>
-          {copied === "file" ? "Copied ✓" : "Copy"}
+        <button onClick={() => copyToClipboard(draft, "file")} className={buttonSecondary}>
+          {copied === "file" ? "copied ✓" : "copy"}
         </button>
-        <button onClick={download} className={buttonClass}>
-          Download llms.txt
+        <button onClick={download} className={buttonSecondary}>
+          download
         </button>
         {dirty ? (
           <>
-            <button
-              onClick={saveEdits}
-              disabled={saving}
-              className="rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-60"
-            >
-              {saving ? "Saving…" : "Save edits"}
+            <button onClick={saveEdits} disabled={saving} className={buttonPrimary}>
+              {saving ? "saving…" : "save edits"}
             </button>
             <button
               onClick={() => setDraft(site.llmsTxt)}
               disabled={saving}
-              className={buttonClass}
+              className={buttonSecondary}
             >
-              Discard changes
+              discard
             </button>
           </>
         ) : (
-          <button disabled className={`${buttonClass} cursor-default opacity-50`}>
-            Saved ✓
+          <button disabled className={`${buttonSecondary} cursor-default opacity-40`}>
+            saved ✓
           </button>
         )}
         <button
           onClick={regenerate}
           disabled={regenerating}
-          className={`${buttonClass} disabled:opacity-40`}
+          className={`${buttonSecondary} disabled:opacity-40`}
         >
-          {regenerating ? (regenMessage ?? "Regenerating…") : "Regenerate"}
+          {regenerating ? (regenMessage ?? "regenerating…") : "regenerate"}
         </button>
         {dirty && (
-          <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-            unsaved changes
+          <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+            ● unsaved changes
           </span>
         )}
       </div>
 
-      <textarea
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        spellCheck={false}
-        disabled={regenerating}
-        className="h-[28rem] w-full resize-y rounded-lg border border-zinc-200 bg-white p-4 font-mono text-xs leading-relaxed shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-900"
-      />
-      <p className="-mt-3 text-xs text-zinc-400">
-        The preview is editable — tweak it, then Save. Copy and Download always use what
-        you see here.
-      </p>
-
-      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-          Hosted file URL
+      <div>
+        <div className="inline-block border border-b-0 border-zinc-300 px-3 py-1.5 font-mono text-[11px] text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+          llms.txt
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          spellCheck={false}
+          disabled={regenerating}
+          className="block h-[30rem] w-full resize-y border border-zinc-300 bg-transparent p-4 font-mono text-xs leading-relaxed outline-none focus:border-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:focus:border-zinc-100"
+        />
+        <p className="mt-2 font-mono text-[11px] text-zinc-400 dark:text-zinc-600">
+          the preview is editable — copy and download always use what you see here
+        </p>
+      </div>
+
+      <div className="border border-zinc-300 p-4 dark:border-zinc-700">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+          hosted file
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
           <a
             href={hostedPath}
             target="_blank"
             rel="noreferrer"
-            className="break-all font-mono text-xs text-indigo-600 hover:underline dark:text-indigo-400"
+            className="break-all font-mono text-xs underline decoration-dotted underline-offset-4"
           >
             {hostedUrl}
           </a>
           <button
             onClick={() => copyToClipboard(hostedUrl, "url")}
-            className="rounded border border-zinc-200 px-2 py-0.5 text-[10px] text-zinc-500 hover:border-indigo-400 dark:border-zinc-700"
+            className="border border-zinc-300 px-2 py-0.5 font-mono text-[10px] text-zinc-500 transition hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-700 dark:hover:border-zinc-100 dark:hover:text-zinc-100"
           >
-            {copied === "url" ? "Copied ✓" : "Copy URL"}
+            {copied === "url" ? "copied ✓" : "copy"}
           </button>
         </div>
-        <p className="mt-2 text-xs text-zinc-400">
-          Always serves the latest saved version — link to it or fetch it from an AI
-          system. Updates automatically when the daily monitor detects site changes.
+        <p className="mt-2 font-mono text-[11px] text-zinc-400 dark:text-zinc-600">
+          always serves the latest saved version · refreshed automatically by the hourly
+          monitor
         </p>
       </div>
     </div>
   );
 }
 
-const buttonClass =
-  "rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-xs font-medium shadow-sm transition hover:border-indigo-400 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-500 dark:hover:text-indigo-400";
+function MetaItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="font-mono text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+        {label}
+      </dt>
+      <dd className="mt-0.5 font-mono text-xs">{value}</dd>
+    </div>
+  );
+}

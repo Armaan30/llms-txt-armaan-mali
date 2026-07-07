@@ -20,26 +20,27 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <body className="flex min-h-full flex-col bg-white text-zinc-900 dark:bg-[#0a0a0a] dark:text-zinc-100">
         <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-4">
+          <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-5 py-4">
             <Link href="/" className="font-mono text-sm font-semibold tracking-tight">
-              <span className="text-indigo-600 dark:text-indigo-400">llms.txt</span>{" "}
-              generator
+              llms.txt<span className="text-zinc-400 dark:text-zinc-600">/generator</span>
             </Link>
             <a
               href="https://llmstxt.org"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+              className="font-mono text-xs text-zinc-500 underline decoration-dotted underline-offset-4 hover:text-zinc-900 dark:hover:text-zinc-100"
             >
-              spec ↗
+              spec
             </a>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>
-        <footer className="mx-auto w-full max-w-4xl px-4 pb-8 pt-4 text-xs text-zinc-400 dark:text-zinc-600">
-          Built by Armaan Mali · crawls politely, respects robots.txt
+        <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-10">{children}</main>
+        <footer className="border-t border-zinc-200 dark:border-zinc-800">
+          <div className="mx-auto w-full max-w-4xl px-5 py-5 font-mono text-[11px] text-zinc-400 dark:text-zinc-600">
+            built by armaan mali · crawls politely · respects robots.txt
+          </div>
         </footer>
       </body>
     </html>

@@ -6,9 +6,9 @@ import { getBrowserId, timeAgo } from "@/lib/client";
 import type { PublicSite } from "@/lib/serialize";
 
 /**
- * The public directory: searchable list of every generated llms.txt, plus a
- * "Mine" tab scoped to this browser's anonymous id. Doubles as the cache
- * surface — clicking a card is instant, no re-crawl.
+ * The public directory: a searchable index of every generated llms.txt,
+ * plus a "mine" tab scoped to this browser's anonymous id. Doubles as the
+ * cache surface — opening a row is instant, no re-crawl.
  */
 
 type Tab = "all" | "mine";
@@ -67,20 +67,20 @@ export default function Directory() {
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded-lg border border-zinc-200 p-0.5 dark:border-zinc-800">
+    <section className="space-y-0">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-900 pb-3 dark:border-zinc-100">
+        <div className="flex gap-5 font-mono text-xs">
           {(["all", "mine"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+              className={`uppercase tracking-widest transition ${
                 tab === t
-                  ? "bg-indigo-600 text-white"
-                  : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                  ? "text-zinc-900 underline underline-offset-8 dark:text-zinc-100"
+                  : "text-zinc-400 hover:text-zinc-700 dark:text-zinc-600 dark:hover:text-zinc-300"
               }`}
             >
-              {t === "all" ? "Directory" : "My sites"}
+              {t === "all" ? "directory" : "my sites"}
             </button>
           ))}
         </div>
@@ -89,72 +89,75 @@ export default function Directory() {
             type="search"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search sites…"
-            className="w-48 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs outline-none placeholder:text-zinc-400 focus:border-indigo-500 dark:border-zinc-800 dark:bg-zinc-900"
+            placeholder="search…"
+            className="w-44 border-b border-zinc-300 bg-transparent pb-1 font-mono text-xs outline-none placeholder:text-zinc-400 focus:border-zinc-900 dark:border-zinc-700 dark:placeholder:text-zinc-600 dark:focus:border-zinc-100"
           />
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p className="py-6 font-mono text-xs text-red-700 dark:text-red-400">{error}</p>
+      )}
 
       {sites === null ? (
-        <p className="py-8 text-center text-sm text-zinc-400">Loading…</p>
+        <p className="py-10 text-center font-mono text-xs text-zinc-400 dark:text-zinc-600">
+          loading…
+        </p>
       ) : sites.length === 0 ? (
-        <p className="py-8 text-center text-sm text-zinc-400">
+        <p className="py-10 text-center font-mono text-xs text-zinc-400 dark:text-zinc-600">
           {tab === "mine"
-            ? "You haven't generated any llms.txt files yet."
+            ? "you haven't generated any llms.txt files yet"
             : query
-              ? "No sites match that search."
-              : "No sites in the directory yet — be the first."}
+              ? "no sites match that search"
+              : "no sites in the directory yet — be the first"}
         </p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {sites.map((site) => (
-            <li key={site.id}>
-              <Link
-                href={`/sites/${site.id}`}
-                className="block rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-indigo-400 hover:shadow dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-600"
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-zinc-200 font-mono text-[10px] uppercase tracking-widest text-zinc-400 dark:border-zinc-800 dark:text-zinc-600">
+              <th className="py-2.5 pr-4 text-left font-normal">domain</th>
+              <th className="hidden py-2.5 pr-4 text-left font-normal sm:table-cell">name</th>
+              <th className="hidden py-2.5 pr-4 text-right font-normal md:table-cell">pages</th>
+              <th className="py-2.5 pr-4 text-left font-normal"></th>
+              <th className="py-2.5 text-right font-normal">checked</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sites.map((site) => (
+              <tr
+                key={site.id}
+                className="group border-b border-zinc-100 transition hover:bg-zinc-50 dark:border-zinc-900 dark:hover:bg-zinc-900/60"
               >
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-sm font-semibold">{site.siteName}</span>
-                  <span
-                    className="shrink-0 text-xs text-zinc-400"
-                    title={`Content last updated ${timeAgo(site.updatedAt)}`}
+                <td className="py-3 pr-4">
+                  <Link
+                    href={`/sites/${site.id}`}
+                    className="font-mono text-sm font-medium group-hover:underline group-hover:underline-offset-4"
                   >
-                    checked {timeAgo(site.lastCheckedAt)}
-                  </span>
-                </div>
-                <div className="mt-0.5 truncate font-mono text-xs text-zinc-500">
-                  {site.domain}
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]">
-                  <Badge>{site.pageCount} pages</Badge>
-                  {site.usedLlm && <Badge tone="indigo">AI-organized</Badge>}
-                  {site.editedByUser && <Badge tone="amber">human-edited</Badge>}
-                  {!site.isListed && <Badge tone="zinc">unlisted</Badge>}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                    {site.domain}
+                  </Link>
+                </td>
+                <td className="hidden max-w-52 truncate py-3 pr-4 text-sm text-zinc-500 dark:text-zinc-400 sm:table-cell">
+                  {site.siteName}
+                </td>
+                <td className="hidden py-3 pr-4 text-right font-mono text-xs text-zinc-400 dark:text-zinc-600 md:table-cell">
+                  {site.pageCount}
+                </td>
+                <td className="py-3 pr-4 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
+                  {site.usedLlm && <span className="mr-2">[ai]</span>}
+                  {site.editedByUser && <span className="mr-2">[edited]</span>}
+                  {!site.isListed && <span className="mr-2">[unlisted]</span>}
+                </td>
+                <td
+                  className="py-3 text-right font-mono text-xs text-zinc-400 dark:text-zinc-600"
+                  title={`content last updated ${timeAgo(site.updatedAt)}`}
+                >
+                  {timeAgo(site.lastCheckedAt)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </section>
-  );
-}
-
-function Badge({
-  children,
-  tone = "zinc",
-}: {
-  children: React.ReactNode;
-  tone?: "zinc" | "indigo" | "amber";
-}) {
-  const tones = {
-    zinc: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-    indigo: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
-    amber: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  };
-  return (
-    <span className={`rounded-full px-2 py-0.5 font-medium ${tones[tone]}`}>{children}</span>
   );
 }

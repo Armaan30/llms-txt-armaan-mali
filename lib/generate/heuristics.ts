@@ -107,7 +107,7 @@ export function inferSiteName(homepage: PageMeta, domain: string): string {
   const raw = homepage.title;
   if (!raw) return domain;
   const segments = raw
-    .split(/\s*[|·•—–:]\s*|\s+-\s+/)
+    .split(/\s*[|\\·•—–:]\s*|\s+-\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
   if (segments.length === 0) return domain;
