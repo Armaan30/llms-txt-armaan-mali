@@ -148,7 +148,7 @@ export default function Directory() {
                   {!site.isListed && <span className="mr-2">[unlisted]</span>}
                 </td>
                 <td
-                  className="py-3 text-right font-mono text-xs text-zinc-400 dark:text-zinc-600"
+                  className="py-3 text-right font-mono text-xs text-emerald-600 dark:text-emerald-400"
                   title={`content last updated ${timeAgo(site.updatedAt)}`}
                 >
                   {timeAgo(site.lastCheckedAt)}
