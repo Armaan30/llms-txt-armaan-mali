@@ -10,7 +10,7 @@ Generate a spec-compliant [llms.txt](https://llmstxt.org) for any website: enter
 - **Organizes with Claude** — page metadata goes to Claude (Opus 4.8) with structured outputs, which writes the summary, groups pages into sections, and cleans up link descriptions. If the LLM is unavailable, a deterministic URL-structure fallback ships instead — generation never fails because a model was down.
 - **Streams progress live** — the UI shows each crawl phase (robots → sitemap → pages → Claude) as it happens.
 - **Public directory with caching** — every generated file lands in a searchable directory. Requesting an existing domain returns the cached file instantly; regeneration is an explicit action. An "unlisted" option keeps a file out of the directory (it still gets a hosted URL).
-- **Editable preview** — tweak the generated markdown before copying/downloading. Manual edits are respected: the monitor stops auto-overwriting a human-curated file.
+- **Editable preview** — tweak the generated markdown before copying/downloading. Manual edits are respected: the monitor stops auto-overwriting a human-curated file. Saving to the shared copy (directory + hosted URL) is owner-gated — only the browser that generated a site can rewrite it; everyone else edits locally for their own copy/download.
 - **Hosted file URL** — every generation is served at `/f/{id}/llms.txt` as plain text, ready to be linked or fetched by an AI system.
 - **Automated updates** — a daily cron re-crawls sites (oldest-checked first), fingerprints the extracted content, and regenerates the llms.txt when the site actually changed. Every site shows *last updated* and *last checked* timestamps.
 

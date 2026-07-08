@@ -28,6 +28,11 @@ export async function GET(
  * PATCH /api/sites/:id — save a manual edit from the preview editor. Marks
  * the row `editedByUser`, which tells the monitoring cron to stop
  * auto-overwriting the human-curated version.
+ *
+ * Edits are owner-gated: the shared row (directory + hosted URL) may only be
+ * rewritten by the browser that generated it. Ownership is the anonymous
+ * browser id — friction rather than security; a session user id slots in
+ * here when auth is added. Unowned rows (seeds) are not editable.
  */
 export async function PATCH(
   req: Request,
@@ -38,10 +43,22 @@ export async function PATCH(
   if (!parsed.success) {
     return Response.json({ error: "Invalid request body." }, { status: 400 });
   }
+  const browserId = parsed.data.browserId ?? null;
   try {
+    const existing = await getSiteById(id);
+    if (!existing) return Response.json({ error: "Not found." }, { status: 404 });
+    if (!browserId || existing.ownerBrowserId !== browserId) {
+      return Response.json(
+        {
+          error:
+            "Only the person who generated this file can edit the shared copy. Use copy or download to make your own version.",
+        },
+        { status: 403 },
+      );
+    }
     const site = await saveManualEdit(id, parsed.data.llmsTxt);
     if (!site) return Response.json({ error: "Not found." }, { status: 404 });
-    return Response.json({ site: toPublicSite(site, parsed.data.browserId ?? null) });
+    return Response.json({ site: toPublicSite(site, browserId) });
   } catch (err) {
     console.error("save edit failed:", err);
     return Response.json({ error: "Could not save your edit." }, { status: 500 });
