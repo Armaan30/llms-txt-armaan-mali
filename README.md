@@ -31,9 +31,12 @@ Optional but recommended:
 npm run seed                      # populate the directory with 6 diverse example sites
 ```
 
-> Local dev needs a Postgres to point `DATABASE_URL` at. The quickest is Docker:
-> `docker run -d --name llmstxt-pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=llmstxt -p 55432:5432 postgres:16-alpine`
-> then `DATABASE_URL="postgresql://postgres:dev@localhost:55432/llmstxt"`.
+> **Local database (for running the app on your own machine only — the deployed app uses Neon, see Deployment):**
+> point `DATABASE_URL` at any Postgres. Two easy options for local dev:
+> - a free [Neon](https://neon.tech) project (same as production), or
+> - a throwaway local Postgres via Docker:
+>   `docker run -d --name llmstxt-pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=llmstxt -p 55432:5432 postgres:16-alpine`
+>   then `DATABASE_URL="postgresql://postgres:dev@localhost:55432/llmstxt"`.
 
 ### Environment variables
 
