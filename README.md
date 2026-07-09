@@ -4,6 +4,8 @@ Generate a spec-compliant [llms.txt](https://llmstxt.org) for any website: enter
 
 **▶ Live app: https://llms-txt-armaan-mali.vercel.app**
 
+**◆ Presentation: [slides](https://docs.google.com/presentation/d/1gMt9tzJs5DIRPWARkAFOGNRni2pv5uXuJGXURn8helI/edit?usp=sharing)**
+
 ## What it does
 
 - **Crawls any public website** — robots.txt-aware, sitemap-first with a BFS fallback, bounded to the ~50 most important pages so the output is a curation, not an index.
