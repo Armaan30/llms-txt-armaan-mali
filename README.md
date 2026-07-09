@@ -2,7 +2,7 @@
 
 Generate a spec-compliant [llms.txt](https://llmstxt.org) for any website: enter a URL, watch the crawl live, get a curated markdown file that helps LLMs understand the site — then let the built-in monitor keep it fresh as the site changes.
 
-**Live app:** _(deployment URL here)_
+**▶ Live app: https://llms-txt-armaan-mali.vercel.app**
 
 ## What it does
 
@@ -12,7 +12,7 @@ Generate a spec-compliant [llms.txt](https://llmstxt.org) for any website: enter
 - **Public directory with caching** — every generated file lands in a searchable directory. Requesting an existing domain returns the cached file instantly; regeneration is an explicit action. An "unlisted" option keeps a file out of the directory (it still gets a hosted URL).
 - **Editable preview** — tweak the generated markdown before copying/downloading. Manual edits are respected: the monitor stops auto-overwriting a human-curated file. Saving to the shared copy (directory + hosted URL) is owner-gated — only the browser that generated a site can rewrite it; everyone else edits locally for their own copy/download.
 - **Hosted file URL** — every generation is served at `/f/{id}/llms.txt` as plain text, ready to be linked or fetched by an AI system.
-- **Automated updates** — a daily cron re-crawls sites (oldest-checked first), fingerprints the extracted content, and regenerates the llms.txt when the site actually changed. Every site shows *last updated* and *last checked* timestamps.
+- **Automated updates** — a scheduled monitor (hourly) re-crawls sites (oldest-checked first), fingerprints the extracted content, and regenerates the llms.txt only when the site actually changed. Every site shows *last updated* and *last checked* timestamps.
 
 ## Setup
 
@@ -31,6 +31,10 @@ Optional but recommended:
 npm run seed                      # populate the directory with 6 diverse example sites
 ```
 
+> Local dev needs a Postgres to point `DATABASE_URL` at. The quickest is Docker:
+> `docker run -d --name llmstxt-pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=llmstxt -p 55432:5432 postgres:16-alpine`
+> then `DATABASE_URL="postgresql://postgres:dev@localhost:55432/llmstxt"`.
+
 ### Environment variables
 
 | Variable | Required | Purpose |
@@ -48,6 +52,25 @@ npm run seed                      # populate the directory with 6 diverse exampl
 4. Run `npm run db:push` once against the production `DATABASE_URL`, then optionally `npm run seed`.
 
 > The generate route sets `maxDuration = 300`; on the Vercel Hobby plan make sure Fluid Compute is enabled (it is by default for new projects) so long crawls aren't cut off.
+
+To enable the hourly monitor via GitHub Actions after deploying, add two repository secrets under *Settings → Secrets and variables → Actions*: `APP_URL` (your deployment URL) and `CRON_SECRET` (same value as the Vercel env var). See [Monitoring](#monitoring-automated-updates) below.
+
+## Testing
+
+```bash
+npm test        # 56 unit tests, ~1.4s, no network/DB
+```
+
+The suite covers the pure, deterministic logic — the SSRF guard (private/metadata IPs blocked), URL normalization, robots.txt parsing + longest-match rules, the selection funnel (noise/locale/nav-boost/templated-cap), HTML extraction fallback chains, the heuristic organizer, spec-compliant rendering, and the change-detection fingerprint (deterministic, order-independent, fires only on real content change). Network/DB/LLM boundaries are verified manually.
+
+## Screenshots
+
+<!-- Add screenshots or a short demo video here, e.g.: -->
+<!-- ![Directory](docs/directory.png) -->
+<!-- ![Live generation](docs/generating.png) -->
+<!-- ![Editable preview + hosted URL](docs/site.png) -->
+
+_See the [live app](https://llms-txt-armaan-mali.vercel.app) for the running product._
 
 ## How it works
 
@@ -124,4 +147,5 @@ app/api/        generate (streaming), sites, cron
 app/f/[id]/     hosted llms.txt route
 app/, components/  UI: generator + live progress, directory, editable site view
 scripts/seed.ts    populate the directory with real generations
+tests/          Vitest unit tests for the pure crawler + generator logic
 ```
